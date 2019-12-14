@@ -4,6 +4,5 @@
  * webpack入口
 */
 import './views/styles/reset.less'
-import './views/styles/about.less'
-
-import './views/about/about'
+// import './views/styles/about.less'
+import './views/home/index.html'

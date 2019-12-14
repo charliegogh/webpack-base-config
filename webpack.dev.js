@@ -8,6 +8,7 @@ const path = require("path");
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CompressionWebpackPlugin = require('compression-webpack-plugin')
 const router=require('./src/router')
 module.exports = {
     //入口（一个或多个）    配置多个入口
@@ -19,7 +20,7 @@ module.exports = {
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "./dist"),
-        publicPath: "/"
+        publicPath: "./"
     },
     devServer: {
         disableHostCheck: true,  //内网穿透失败解决方式
@@ -80,7 +81,6 @@ module.exports = {
         // rom 热加载
         new webpack.HotModuleReplacementPlugin(),
         new ExtractTextPlugin('[name].css'),
-        router(),
         // 分离css
         // 本地静态资源访问
         new CopyWebpackPlugin([
@@ -93,6 +93,19 @@ module.exports = {
         new webpack.ProvidePlugin({
             $: 'jquery',
         }),
-
-    ]
+        new CompressionWebpackPlugin({
+            // 目标文件名称。[path] 被替换为原始文件的路径和 [query] 查询
+            filename: '[path].gz[query]',
+            // 使用 gzip 压缩
+            algorithm: 'gzip',
+            // 处理与此正则相匹配的所有文件
+            test: new RegExp(
+                '\\.(js|css)$'
+            ),
+            // 只处理大于此大小的文件
+            threshold: 10240,
+            // 最小压缩比达到 0.8 时才会被压缩
+            minRatio: 0.8
+        })
+    ].concat(router())
 }
