@@ -20,7 +20,7 @@ module.exports = {
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "./dist"),
-        publicPath: "./"
+        // publicPath: "/"
     },
     devServer: {
         disableHostCheck: true,  //内网穿透失败解决方式
@@ -29,7 +29,7 @@ module.exports = {
         hot: true,
         overlay: true,
         host: 'localhost', // can be overwritten by process.env.HOST
-        port: '8109',
+        port: '8103',
         // 本地开发环境反向代理
         /*        proxy: {
                     '/':{
@@ -45,13 +45,28 @@ module.exports = {
     },
     module: {
         rules: [
+            //  合并css 将所有样式文件合并  不支持样式热加载
+            // {
+            //     test: /\.less$/,
+            //     use: ExtractTextPlugin.extract({
+            //         fallback: 'style-loader',
+            //         use: ['css-loader', 'less-loader']
+            //     }),
+            // },
+            // dev
             {
-                test: /\.less$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: ['css-loader', 'less-loader']
-                }),
+                test: /\.less$$/,
+                use: [
+                    'style-loader',
+                    {
+                    loader: 'css-loader',
+                    options: {
+                        minimize: true, // 使用 css 的压缩功能
+                    },
+                    }
+                ,'less-loader']
             },
+
             //html loaders
             {
                 test: /\.html$/,
@@ -61,8 +76,25 @@ module.exports = {
             {
                 //匹配到.jpg|png|svg|gif结尾的文件
                 test: /\.(jpg|png|svg|gif)$/,
-                //多个loader需要从后到前进行解析(大于10kb打包)
-                use: ["url-loader?limit=10&name=images/[name]-[hash:8].[ext]"]
+                // 借助 url-loader 对小图标进行DataUrl处理
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 1024, // 单位是 Byte，当文件小于 8KB 时作为 DataURL 处理
+                        },
+                    },
+                    {
+                        loader: 'image-webpack-loader',
+                        options: {
+                            mozjpeg: { // 压缩 jpeg 的配置
+                                progressive: true,
+                                quality: 65
+                            },
+                        }
+
+                    }
+                ],
             },
             // JS loaders
             {
@@ -71,6 +103,21 @@ module.exports = {
                 // 排除node_modules中的JS文件
                 exclude: /node_modules/
             }
+            // JS loaders
+/*            {
+                test: /\.js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env'],
+                        plugins: [
+                            '@babel/plugin-transform-runtime',
+                            '@babel/plugin-transform-modules-commonjs'
+                        ]
+                    }
+                }
+            }*/
         ]
     },
     /**
@@ -80,19 +127,20 @@ module.exports = {
     plugins: [
         // rom 热加载
         new webpack.HotModuleReplacementPlugin(),
+        // 分离css   不适用开发环境
         new ExtractTextPlugin('[name].css'),
-        // 分离css
-        // 本地静态资源访问
+        // 本地静态资源访问  拎出不需要webpack打包的文件
         new CopyWebpackPlugin([
             {
-                from: path.resolve(__dirname, './src/assest'),
-                to: './assest',
+                from: path.resolve(__dirname, './src/assest'),   // 配置来源
+                to: './assest', // 配置目标路径
             }
         ]),
         // 自动加载模块，而不 import 或 require 。
         new webpack.ProvidePlugin({
             $: 'jquery',
         }),
+        // 压缩配置
         new CompressionWebpackPlugin({
             // 目标文件名称。[path] 被替换为原始文件的路径和 [query] 查询
             filename: '[path].gz[query]',
