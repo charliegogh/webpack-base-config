@@ -89,7 +89,7 @@ module.exports = {
                         options: {
                             mozjpeg: { // 压缩 jpeg 的配置
                                 progressive: true,
-                                quality: 65
+                                quality: 50
                             },
                         }
 
