@@ -33,7 +33,7 @@
     "style-loader": "^0.21.0"
   },
   "dependencies": {
-    "jquery": "^3.4.1"
+    "jquery": "^3.5.0"
   },
   "author": "charlie",
   "license": "ISC"
