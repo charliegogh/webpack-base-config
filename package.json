@@ -35,7 +35,7 @@
     "webpack-mild-compile": "^3.2.0"
   },
   "dependencies": {
-    "jquery": "^3.4.1"
+    "jquery": "^3.5.0"
   },
   "author": "charlie",
   "license": "ISC"
